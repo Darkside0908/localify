@@ -1,0 +1,1276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Localify Launch Motion</title>
+  <style>
+    @font-face {
+      font-family: "IBM Plex Sans";
+      src: url("../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "IBM Plex Sans";
+      src: url("../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-500-normal.woff2") format("woff2");
+      font-weight: 500;
+      font-style: normal;
+    }
+    @font-face {
+      font-family: "IBM Plex Sans";
+      src: url("../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2") format("woff2");
+      font-weight: 600;
+      font-style: normal;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 1280px;
+      height: 720px;
+      overflow: hidden;
+      background-color: #0B0B0C;
+      color: #EDEDED;
+      font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stage {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+      background-color: #0B0B0C;
+      background-image: radial-gradient(rgba(237, 237, 237, 0.045) 1px, transparent 1px);
+      background-size: 32px 32px;
+      overflow: hidden;
+    }
+
+    /* Scene 1 & Scene 5 full-frame centered beats */
+    .center-beat {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .hook-title {
+      margin-top: 24px;
+      font-size: 52px;
+      line-height: 1.08;
+      font-weight: 500;
+      letter-spacing: -0.025em;
+      color: #EDEDED;
+    }
+
+    .hook-sub {
+      margin-top: 16px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: #A1A1A6;
+    }
+
+    /* Top scene label above app window */
+    .scene-caption {
+      position: absolute;
+      top: 20px;
+      left: 110px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #A1A1A6;
+      pointer-events: none;
+    }
+
+    .scene-caption-num {
+      color: #E0A23B;
+    }
+
+    /* App Window Container */
+    .window-wrap {
+      position: absolute;
+      top: 56px;
+      left: 110px;
+      width: 1060px;
+      height: 616px;
+      perspective: 1400px;
+    }
+
+    .app-window {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(237, 237, 237, 0.12);
+      background: #0F0F10;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.72);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transform-origin: center bottom;
+    }
+
+    .app-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 216px;
+      flex-shrink: 0;
+      background: #0F0F10;
+      border-right: 1px solid rgba(237, 237, 237, 0.08);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      margin-bottom: 20px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #EDEDED;
+    }
+
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      height: 34px;
+      border-radius: 8px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #A1A1A6;
+    }
+
+    .nav-item.active {
+      background: #232325;
+      color: #EDEDED;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      font-weight: 500;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-count {
+      font-size: 12px;
+      color: #85858B;
+    }
+
+    .sidebar-section {
+      margin-top: 24px;
+      padding: 0 10px;
+      font-size: 12px;
+      color: #85858B;
+      margin-bottom: 8px;
+    }
+
+    /* Main Workspace */
+    .main {
+      flex: 1;
+      min-width: 0;
+      background: #141415;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .topbar {
+      height: 52px;
+      border-bottom: 1px solid rgba(237, 237, 237, 0.08);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .search-box {
+      width: 240px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid rgba(237, 237, 237, 0.08);
+      background: #19191B;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #85858B;
+    }
+
+    .kbd {
+      border-radius: 4px;
+      border: 1px solid rgba(237, 237, 237, 0.08);
+      background: #232325;
+      padding: 2px 6px;
+      font-size: 11px;
+      color: #85858B;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(237, 237, 237, 0.08);
+      background: #232325;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #EDEDED;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-primary {
+      height: 34px;
+      border-radius: 8px;
+      background: #EDEDED;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #0F0F10;
+    }
+
+    .view-layer {
+      position: absolute;
+      top: 52px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 20px 24px;
+    }
+
+    .view-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(237, 237, 237, 0.08);
+    }
+
+    .view-title {
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      color: #EDEDED;
+    }
+
+    .view-meta {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #A1A1A6;
+    }
+
+    /* Track table */
+    .table-head {
+      height: 34px;
+      display: grid;
+      grid-template-columns: 36px 1fr 196px 68px;
+      gap: 12px;
+      align-items: center;
+      padding: 0 12px;
+      border-bottom: 1px solid rgba(237, 237, 237, 0.08);
+      font-size: 12px;
+      color: #85858B;
+      margin-top: 12px;
+    }
+
+    .track-list {
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .track-row {
+      position: relative;
+      height: 52px;
+      display: grid;
+      grid-template-columns: 36px 1fr 196px 68px;
+      gap: 12px;
+      align-items: center;
+      padding: 0 12px;
+      border-radius: 8px;
+    }
+
+    .track-row.active {
+      background: #232325;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .track-rail {
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      border-radius: 2px;
+      background: #E0A23B;
+    }
+
+    .sleeve {
+      width: 36px;
+      height: 36px;
+      border-radius: 5px;
+      border: 1px solid rgba(237, 237, 237, 0.08);
+      background: #1B1B1E;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .track-main {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .track-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: #EDEDED;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-row.active .track-title {
+      color: #E0A23B;
+    }
+
+    .track-artist {
+      margin-top: 2px;
+      font-size: 12px;
+      color: #A1A1A6;
+    }
+
+    .track-audio {
+      font-size: 12px;
+      color: #85858B;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .track-time {
+      text-align: right;
+      font-size: 12px;
+      color: #A1A1A6;
+    }
+
+    .eq-wrap {
+      height: 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 2px;
+    }
+
+    .eq-bar {
+      width: 2px;
+      border-radius: 2px;
+      background: #E0A23B;
+    }
+
+    /* Downloader view */
+    .dl-card {
+      margin-top: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(237, 237, 237, 0.08);
+      background: #19191B;
+      padding: 16px;
+    }
+
+    .dl-input {
+      height: 44px;
+      border-radius: 8px;
+      border: 1px solid rgba(237, 237, 237, 0.08);
+      background: #141415;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      color: #EDEDED;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .dl-banner {
+      margin-top: 10px;
+      border-left: 2px solid #E0A23B;
+      background: #141415;
+      padding: 8px 12px;
+      font-size: 12px;
+      color: #A1A1A6;
+    }
+
+    .dl-toolbar {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .seg-group {
+      display: inline-flex;
+      gap: 4px;
+      border-radius: 8px;
+      border: 1px solid rgba(237, 237, 237, 0.08);
+      background: #141415;
+      padding: 4px;
+    }
+
+    .seg-btn {
+      height: 26px;
+      border-radius: 4px;
+      padding: 0 10px;
+      display: inline-flex;
+      align-items: center;
+      font-size: 12px;
+      color: #85858B;
+    }
+
+    .seg-btn.active {
+      background: #232325;
+      color: #EDEDED;
+    }
+
+    .dl-job {
+      margin-top: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(237, 237, 237, 0.08);
+      background: #19191B;
+      padding: 16px;
+    }
+
+    .dl-progress-track {
+      margin-top: 10px;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(237, 237, 237, 0.1);
+      overflow: hidden;
+    }
+
+    .dl-progress-fill {
+      height: 100%;
+      background: #E0A23B;
+    }
+
+    /* Right panel */
+    .right-panel {
+      flex-shrink: 0;
+      background: #0F0F10;
+      border-left: 1px solid rgba(237, 237, 237, 0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .right-inner {
+      width: 264px;
+      padding: 16px;
+    }
+
+    .chapter-item {
+      height: 34px;
+      border-radius: 8px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #A1A1A6;
+    }
+
+    .chapter-item.active {
+      background: #232325;
+      color: #E0A23B;
+      font-weight: 500;
+    }
+
+    /* Player deck */
+    .player-bar {
+      height: 76px;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(237, 237, 237, 0.08);
+      background: #0F0F10;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .player-left {
+      width: 280px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .player-center {
+      flex: 1;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .transport {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: #A1A1A6;
+    }
+
+    .play-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: #EDEDED;
+      color: #0F0F10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scrubber-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #85858B;
+    }
+
+    .scrubber-track {
+      position: relative;
+      flex: 1;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(237, 237, 237, 0.14);
+    }
+
+    .scrubber-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: #E0A23B;
+    }
+
+    .scrubber-knob {
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #EDEDED;
+      transform: translate(-50%, -50%);
+    }
+
+    .tick {
+      position: absolute;
+      top: -2px;
+      width: 2px;
+      height: 7px;
+      background: rgba(237, 237, 237, 0.35);
+    }
+
+    .player-right {
+      width: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      font-size: 12px;
+      color: #A1A1A6;
+    }
+
+    /* Animated Cursor */
+    .cursor {
+      position: absolute;
+      z-index: 60;
+      pointer-events: none;
+      transform-origin: 4px 2px;
+    }
+
+    .click-ring {
+      position: absolute;
+      z-index: 59;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1.5px solid #E0A23B;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <!-- Scene 1: Opening Hook -->
+    <div class="center-beat" id="scene1">
+      <svg viewBox="0 0 128 128" width="76" height="76">
+        <rect x="4" y="4" width="120" height="120" rx="28" fill="#141415" stroke="#EDEDED" stroke-opacity="0.14" stroke-width="2" />
+        <circle id="s1-ring1" cx="64" cy="64" r="38" fill="none" stroke="#EDEDED" stroke-opacity="0.7" stroke-width="2" stroke-dasharray="239" stroke-dashoffset="239" />
+        <circle id="s1-ring2" cx="64" cy="64" r="24" fill="none" stroke="#EDEDED" stroke-opacity="0.28" stroke-width="1.5" stroke-dasharray="151" stroke-dashoffset="151" />
+        <circle id="s1-dot" cx="64" cy="64" r="6" fill="#E0A23B" />
+      </svg>
+      <div class="hook-title" id="s1-title">Your music, offline.</div>
+      <div class="hook-sub mono" id="s1-sub">Zero streaming quota · Zero ads · Linux desktop</div>
+    </div>
+
+    <!-- Top Caption -->
+    <div class="scene-caption mono" id="scene-caption">
+      <span class="scene-caption-num" id="cap-num">01</span>
+      <span id="cap-text">Local library &amp; auto-resume</span>
+    </div>
+
+    <!-- App Window Showcase -->
+    <div class="window-wrap" id="window-wrap">
+      <div class="app-window" id="app-window">
+        <div class="app-body">
+          <!-- Sidebar -->
+          <aside class="sidebar">
+            <div class="brand">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <circle cx="12" cy="12" r="9.5" fill="none" stroke="#EDEDED" stroke-opacity="0.85" stroke-width="1.5" />
+                <circle cx="12" cy="12" r="5.5" fill="none" stroke="#EDEDED" stroke-opacity="0.3" stroke-width="1" />
+                <circle cx="12" cy="12" r="2" fill="#E0A23B" />
+              </svg>
+              <span>Localify</span>
+            </div>
+
+            <div class="nav-list">
+              <div class="nav-item active" id="nav-library">
+                <span class="nav-left">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+                  <span>Library</span>
+                </span>
+                <span class="nav-count mono" id="lib-count">5</span>
+              </div>
+
+              <div class="nav-item" id="nav-downloader">
+                <span class="nav-left">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                  <span>Downloader</span>
+                </span>
+                <span class="nav-count mono" id="dl-nav-dot" style="color:#E0A23B; opacity:0;">●</span>
+              </div>
+
+              <div class="nav-item">
+                <span class="nav-left">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20.5s-7-4.5-9-9.5A5.4 5.4 0 0 1 12 6.4 5.4 5.4 0 0 1 21 11c-2 5-9 9.5-9 9.5z"/></svg>
+                  <span>Liked songs</span>
+                </span>
+                <span class="nav-count mono">3</span>
+              </div>
+            </div>
+
+            <div class="sidebar-section">Playlists</div>
+            <div class="nav-list">
+              <div class="nav-item">
+                <span>Late Night Sets</span>
+                <span class="nav-count mono">4</span>
+              </div>
+              <div class="nav-item">
+                <span>Deep Focus</span>
+                <span class="nav-count mono">9</span>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Center Stage -->
+          <main class="main">
+            <div class="topbar">
+              <div class="search-box">
+                <span>Search</span>
+                <span class="kbd mono">Ctrl F</span>
+              </div>
+              <div class="topbar-actions">
+                <div class="btn-secondary">Rescan</div>
+                <div class="btn-secondary">Download</div>
+              </div>
+            </div>
+
+            <!-- Library View -->
+            <div class="view-layer" id="view-library">
+              <div class="view-head">
+                <div>
+                  <div class="view-title">Library</div>
+                  <div class="view-meta mono">5 tracks · 3 hr 33 min · 494 MB</div>
+                </div>
+                <div class="topbar-actions">
+                  <div class="btn-primary">▶ Play</div>
+                  <div class="btn-secondary">Shuffle</div>
+                </div>
+              </div>
+
+              <div class="table-head">
+                <div class="mono" style="text-align:center">#</div>
+                <div>Title</div>
+                <div>Audio</div>
+                <div style="text-align:right">Time</div>
+              </div>
+
+              <div class="track-list" id="track-list">
+                <div class="track-row" id="row-1">
+                  <div class="track-rail" id="row1-rail" style="opacity:0"></div>
+                  <div id="row1-idx" class="mono" style="text-align:center; font-size:12px; color:#85858B">1</div>
+                  <div class="track-main">
+                    <div class="sleeve">
+                      <svg viewBox="0 0 32 32" width="24" height="24">
+                        <circle cx="16" cy="16" r="13" fill="#141415" stroke="#EDEDED" stroke-opacity="0.1" />
+                        <circle cx="16" cy="16" r="5" fill="#232325" />
+                        <circle cx="16" cy="16" r="2" fill="#E0A23B" />
+                      </svg>
+                    </div>
+                    <div style="min-width:0">
+                      <div class="track-title">Robstee Live Set April 2026 (Opiuci Bandung)</div>
+                      <div class="track-artist">Robstee · <span class="mono" style="color:#E0A23B">24:15</span></div>
+                    </div>
+                  </div>
+                  <div class="track-audio mono">mp3 · 226k · 163 MB</div>
+                  <div class="track-time mono">1:40:41</div>
+                </div>
+
+                <div class="track-row" id="row-2">
+                  <div class="track-rail" id="row2-rail" style="opacity:0"></div>
+                  <div id="row2-idx" class="mono" style="text-align:center; font-size:12px; color:#85858B">2</div>
+                  <div class="track-main">
+                    <div class="sleeve">
+                      <svg viewBox="0 0 32 32" width="24" height="24">
+                        <circle cx="16" cy="16" r="13" fill="#141415" stroke="#EDEDED" stroke-opacity="0.1" />
+                        <circle cx="16" cy="16" r="5" fill="#232325" />
+                        <circle cx="16" cy="16" r="2" fill="#E0A23B" />
+                      </svg>
+                    </div>
+                    <div style="min-width:0">
+                      <div class="track-title">Boiler Room London Live Set</div>
+                      <div class="track-artist">Fred again..</div>
+                    </div>
+                  </div>
+                  <div class="track-audio mono">mp3 · 320k · 156 MB · 14ch</div>
+                  <div class="track-time mono">1:08:12</div>
+                </div>
+
+                <div class="track-row">
+                  <div class="mono" style="text-align:center; font-size:12px; color:#85858B">3</div>
+                  <div class="track-main">
+                    <div class="sleeve">
+                      <svg viewBox="0 0 32 32" width="24" height="24">
+                        <circle cx="16" cy="16" r="13" fill="#141415" stroke="#EDEDED" stroke-opacity="0.1" />
+                        <circle cx="16" cy="16" r="5" fill="#232325" />
+                        <circle cx="16" cy="16" r="2" fill="#85858B" />
+                      </svg>
+                    </div>
+                    <div style="min-width:0">
+                      <div class="track-title">Aruarian Dance</div>
+                      <div class="track-artist">Nujabes</div>
+                    </div>
+                  </div>
+                  <div class="track-audio mono">flac · 982k · 29 MB</div>
+                  <div class="track-time mono">4:10</div>
+                </div>
+
+                <div class="track-row">
+                  <div class="mono" style="text-align:center; font-size:12px; color:#85858B">4</div>
+                  <div class="track-main">
+                    <div class="sleeve">
+                      <svg viewBox="0 0 32 32" width="24" height="24">
+                        <circle cx="16" cy="16" r="13" fill="#141415" stroke="#EDEDED" stroke-opacity="0.1" />
+                        <circle cx="16" cy="16" r="5" fill="#232325" />
+                        <circle cx="16" cy="16" r="2" fill="#E0A23B" />
+                      </svg>
+                    </div>
+                    <div style="min-width:0">
+                      <div class="track-title">Lost Village Live Recording</div>
+                      <div class="track-artist">Four Tet</div>
+                    </div>
+                  </div>
+                  <div class="track-audio mono">opus · 160k · 62 MB</div>
+                  <div class="track-time mono">54:20</div>
+                </div>
+
+                <div class="track-row">
+                  <div class="mono" style="text-align:center; font-size:12px; color:#85858B">5</div>
+                  <div class="track-main">
+                    <div class="sleeve">
+                      <svg viewBox="0 0 32 32" width="24" height="24">
+                        <circle cx="16" cy="16" r="13" fill="#141415" stroke="#EDEDED" stroke-opacity="0.1" />
+                        <circle cx="16" cy="16" r="5" fill="#232325" />
+                        <circle cx="16" cy="16" r="2" fill="#E0A23B" />
+                      </svg>
+                    </div>
+                    <div style="min-width:0">
+                      <div class="track-title">Pitchfork Live Paris</div>
+                      <div class="track-artist">Khruangbin</div>
+                    </div>
+                  </div>
+                  <div class="track-audio mono">m4a · 256k · 84 MB</div>
+                  <div class="track-time mono">46:18</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Downloader View -->
+            <div class="view-layer" id="view-downloader" style="opacity:0">
+              <div class="view-head">
+                <div>
+                  <div class="view-title">Downloader</div>
+                  <div class="view-meta">Save audio, artwork, and chapters from YouTube locally</div>
+                </div>
+                <div class="btn-secondary">Import links.txt</div>
+              </div>
+
+              <div class="dl-card">
+                <div class="dl-input mono" id="dl-url-text">
+                  <span style="color:#85858B">Paste YouTube URLs, one per line</span>
+                </div>
+
+                <div class="dl-banner" id="dl-banner" style="opacity:0">
+                  URL contains <span class="mono" style="color:#EDEDED">list=</span> · Single track mode active (--no-playlist)
+                </div>
+
+                <div class="dl-toolbar">
+                  <div class="seg-group mono">
+                    <div class="seg-btn active">MP3</div>
+                    <div class="seg-btn">M4A</div>
+                    <div class="seg-btn">OPUS</div>
+                  </div>
+                  <div class="btn-primary" id="dl-submit-btn">Download</div>
+                </div>
+              </div>
+
+              <div class="dl-job" id="dl-job-card" style="opacity:0">
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                  <div style="font-size:13px; font-weight:500; color:#EDEDED">Fred again.. — Boiler Room London Live Set</div>
+                  <div class="mono" id="dl-job-status" style="font-size:12px; color:#E0A23B">downloading</div>
+                </div>
+                <div class="dl-progress-track">
+                  <div class="dl-progress-fill" id="dl-job-bar" style="width:0%"></div>
+                </div>
+                <div class="mono" style="margin-top:8px; display:flex; justify-content:space-between; font-size:12px; color:#85858B">
+                  <span id="dl-job-meta">6.4 MiB/s · ETA 00:08</span>
+                  <span id="dl-job-pct">0%</span>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <!-- Right Chapters Drawer -->
+          <aside class="right-panel" id="right-panel" style="width:0px; border-left-width:0px;">
+            <div class="right-inner">
+              <div style="font-size:13px; font-weight:500; color:#EDEDED; margin-bottom:12px;">
+                Queue &amp; chapters
+              </div>
+              <div style="border-radius:10px; border:1px solid rgba(237,237,237,0.08); background:#19191B; padding:12px; margin-bottom:16px;">
+                <div style="font-size:13px; font-weight:500; color:#EDEDED">Boiler Room London Live Set</div>
+                <div style="font-size:12px; color:#A1A1A6; margin-top:2px;">Fred again..</div>
+                <div class="mono" style="font-size:11px; color:#85858B; margin-top:6px;">mp3 · 320 kbps · 156 MB</div>
+              </div>
+
+              <div style="font-size:12px; color:#85858B; margin-bottom:6px;">Chapters (14)</div>
+              <div style="display:flex; flex-direction:column; gap:3px;">
+                <div class="chapter-item" id="ch-1">
+                  <span>Intro &amp; Warmup</span>
+                  <span class="mono">0:00</span>
+                </div>
+                <div class="chapter-item active" id="ch-2">
+                  <span>Deep Percussions</span>
+                  <span class="mono">18:40</span>
+                </div>
+                <div class="chapter-item" id="ch-3">
+                  <span>Unreleased ID</span>
+                  <span class="mono">34:10</span>
+                </div>
+                <div class="chapter-item" id="ch-4">
+                  <span>Peak Hour Mix</span>
+                  <span class="mono">49:25</span>
+                </div>
+                <div class="chapter-item" id="ch-5">
+                  <span>Closing Track</span>
+                  <span class="mono">1:01:15</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <!-- Bottom Player Deck -->
+        <footer class="player-bar">
+          <div class="player-left">
+            <div class="sleeve" style="width:44px; height:44px">
+              <svg viewBox="0 0 32 32" width="28" height="28">
+                <circle cx="16" cy="16" r="13" fill="#141415" stroke="#EDEDED" stroke-opacity="0.1" />
+                <circle cx="16" cy="16" r="5" fill="#232325" />
+                <circle cx="16" cy="16" r="2" fill="#E0A23B" />
+              </svg>
+            </div>
+            <div style="min-width:0">
+              <div class="track-title" id="deck-title" style="color:#EDEDED">Ready for playback</div>
+              <div class="track-artist" id="deck-artist">Select a track</div>
+            </div>
+          </div>
+
+          <div class="player-center">
+            <div class="transport">
+              <span style="font-size:12px">Shuffle</span>
+              <span style="font-size:12px">Prev</span>
+              <div class="play-circle" id="deck-play-icon">▶</div>
+              <span style="font-size:12px">Next</span>
+              <span style="font-size:12px">Repeat</span>
+            </div>
+            <div class="scrubber-row mono">
+              <span id="deck-cur" style="width:48px; text-align:right">0:00</span>
+              <div class="scrubber-track">
+                <div class="tick" style="left:27%"></div>
+                <div class="tick" style="left:50%"></div>
+                <div class="tick" style="left:72%"></div>
+                <div class="scrubber-fill" id="deck-fill" style="width:0%"></div>
+                <div class="scrubber-knob" id="deck-knob" style="left:0%"></div>
+              </div>
+              <span id="deck-dur" style="width:52px">0:00</span>
+            </div>
+          </div>
+
+          <div class="player-right mono">
+            <span>1x</span>
+            <div style="width:72px; height:3px; border-radius:999px; background:rgba(237,237,237,0.14); overflow:hidden">
+              <div style="width:82%; height:100%; background:#A1A1A6"></div>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Scene 5: Outro -->
+    <div class="center-beat" id="scene5" style="opacity:0">
+      <svg viewBox="0 0 128 128" width="64" height="64">
+        <rect x="4" y="4" width="120" height="120" rx="28" fill="#141415" stroke="#EDEDED" stroke-opacity="0.14" stroke-width="2" />
+        <circle cx="64" cy="64" r="38" fill="none" stroke="#EDEDED" stroke-opacity="0.6" stroke-width="2" />
+        <circle cx="64" cy="64" r="24" fill="none" stroke="#EDEDED" stroke-opacity="0.25" stroke-width="1.5" />
+        <circle cx="64" cy="64" r="5" fill="#E0A23B" />
+      </svg>
+      <div class="hook-title" style="font-size:44px">Download once. Listen forever.</div>
+      <div class="hook-sub mono">github.com/Darkside0908/localify · MIT · Linux</div>
+    </div>
+
+    <!-- Animated Pointer & Click Ring -->
+    <div class="click-ring" id="click-ring" style="opacity:0"></div>
+    <svg class="cursor" id="cursor" width="22" height="22" viewBox="0 0 24 24" style="opacity:0">
+      <path d="M4 2l14 10.5-6.2 1.2L8.4 20 4 2z" fill="#EDEDED" stroke="#0F0F10" stroke-width="1.6" stroke-linejoin="round" />
+    </svg>
+  </div>
+
+  <script>
+    const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
+    const prog = (t, start, end) => clamp((t - start) / (end - start));
+    const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+    const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+    const lerp = (a, b, x) => a + (b - a) * x;
+
+    function fmtTime(sec) {
+      const s = Math.floor(sec);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const r = s % 60;
+      if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}`;
+      return `${m}:${String(r).padStart(2, '0')}`;
+    }
+
+    const URL_SAMPLE = 'https://youtube.com/watch?v=yC4i2cy9-Mw&list=RDyC4i2cy9-Mw';
+
+    window.renderFrame = function (t) {
+      // Scene 1: Opening Hook (0.0 -> 2.8s)
+      const s1 = document.getElementById('scene1');
+      const s1FadeOut = prog(t, 2.25, 2.75);
+      const s1Alpha = 1 - easeInOut(s1FadeOut);
+      s1.style.opacity = s1Alpha;
+      s1.style.transform = `translateY(${lerp(0, -18, easeInOut(s1FadeOut))}px)`;
+
+      const ringP = easeOut(prog(t, 0.05, 0.95));
+      document.getElementById('s1-ring1').setAttribute('stroke-dashoffset', (239 * (1 - ringP)).toFixed(1));
+      document.getElementById('s1-ring2').setAttribute('stroke-dashoffset', (151 * (1 - ringP)).toFixed(1));
+      document.getElementById('s1-dot').setAttribute('r', (6 * easeOut(prog(t, 0.25, 0.75))).toFixed(2));
+
+      const titleP = easeOut(prog(t, 0.35, 1.05));
+      const s1Title = document.getElementById('s1-title');
+      s1Title.style.opacity = titleP;
+      s1Title.style.transform = `translateY(${lerp(20, 0, titleP)}px)`;
+
+      const subP = easeOut(prog(t, 0.75, 1.35));
+      const s1Sub = document.getElementById('s1-sub');
+      s1Sub.style.opacity = subP;
+      s1Sub.style.transform = `translateY(${lerp(12, 0, subP)}px)`;
+
+      // Window entrance (2.5 -> 3.4) and outro exit (13.6 -> 14.2)
+      const winEnter = easeOut(prog(t, 2.5, 3.4));
+      const winExit = easeInOut(prog(t, 13.55, 14.15));
+      const winOpacity = winEnter * (1 - winExit);
+      const appWindow = document.getElementById('app-window');
+      appWindow.style.opacity = winOpacity;
+      const rx = lerp(9, 0, winEnter) + lerp(0, -4, winExit);
+      const ty = lerp(42, 0, winEnter) + lerp(0, -16, winExit);
+      const sc = lerp(0.92, 1.0, winEnter) * lerp(1.0, 0.95, winExit);
+      appWindow.style.transform = `translateY(${ty.toFixed(2)}px) rotateX(${rx.toFixed(2)}deg) scale(${sc.toFixed(4)})`;
+
+      // Top Caption
+      const cap = document.getElementById('scene-caption');
+      cap.style.opacity = easeOut(prog(t, 2.9, 3.4)) * (1 - winExit);
+      const capNum = document.getElementById('cap-num');
+      const capText = document.getElementById('cap-text');
+      if (t < 6.45) {
+        capNum.textContent = '01';
+        capText.textContent = 'Local library & auto-resume';
+      } else if (t < 10.65) {
+        capNum.textContent = '02';
+        capText.textContent = 'Built-in yt-dlp archiver';
+      } else {
+        capNum.textContent = '03';
+        capText.textContent = 'Chapters & instant HTTP 206 seeking';
+      }
+
+      // Views crossfade
+      const inDownloader = t >= 6.95 && t < 10.65;
+      document.getElementById('view-library').style.opacity = inDownloader ? 0 : 1;
+      document.getElementById('view-downloader').style.opacity = inDownloader ? 1 : 0;
+
+      document.getElementById('nav-library').className = inDownloader ? 'nav-item' : 'nav-item active';
+      document.getElementById('nav-downloader').className = inDownloader ? 'nav-item active' : 'nav-item';
+
+      // Track selection state
+      const row1 = document.getElementById('row-1');
+      const row2 = document.getElementById('row-2');
+      const row1Rail = document.getElementById('row1-rail');
+      const row2Rail = document.getElementById('row2-rail');
+      const row1Idx = document.getElementById('row1-idx');
+      const row2Idx = document.getElementById('row2-idx');
+      const deckTitle = document.getElementById('deck-title');
+      const deckArtist = document.getElementById('deck-artist');
+      const deckPlayIcon = document.getElementById('deck-play-icon');
+      const deckCur = document.getElementById('deck-cur');
+      const deckDur = document.getElementById('deck-dur');
+      const deckFill = document.getElementById('deck-fill');
+      const deckKnob = document.getElementById('deck-knob');
+
+      const eqMarkup = (phase) => {
+        const h1 = Math.round(35 + 55 * Math.abs(Math.sin(phase * 5.2)));
+        const h2 = Math.round(35 + 55 * Math.abs(Math.sin(phase * 6.4 + 1.1)));
+        const h3 = Math.round(35 + 55 * Math.abs(Math.sin(phase * 4.7 + 2.3)));
+        return `<div class="eq-wrap"><span class="eq-bar" style="height:${h1}%"></span><span class="eq-bar" style="height:${h2}%"></span><span class="eq-bar" style="height:${h3}%"></span></div>`;
+      };
+
+      if (t >= 4.6 && t < 10.65) {
+        row1.className = 'track-row active';
+        row1Rail.style.opacity = 1;
+        row1Idx.innerHTML = eqMarkup(t);
+        row2.className = 'track-row';
+        row2Rail.style.opacity = 0;
+        row2Idx.textContent = '2';
+
+        deckTitle.textContent = 'Robstee Live Set April 2026 (Opiuci Bandung)';
+        deckArtist.textContent = 'Robstee · Resumed 24:15';
+        deckPlayIcon.textContent = '❚❚';
+        const sec = 1455 + Math.max(0, t - 4.6) * 2.0;
+        const pct = (sec / 6041) * 100;
+        deckCur.textContent = fmtTime(sec);
+        deckDur.textContent = '1:40:41';
+        deckFill.style.width = `${pct.toFixed(2)}%`;
+        deckKnob.style.left = `${pct.toFixed(2)}%`;
+      } else if (t >= 10.65) {
+        row1.className = 'track-row';
+        row1Rail.style.opacity = 0;
+        row1Idx.textContent = '1';
+        row2.className = 'track-row active';
+        row2Rail.style.opacity = 1;
+        row2Idx.innerHTML = eqMarkup(t);
+
+        deckTitle.textContent = 'Boiler Room London Live Set';
+        deckArtist.textContent = 'Fred again..';
+        deckPlayIcon.textContent = '❚❚';
+        const jumpP = easeInOut(prog(t, 11.95, 12.25));
+        const baseSec = lerp(1120, 2050, jumpP) + Math.max(0, t - 12.25) * 1.5;
+        const pct = (baseSec / 4092) * 100;
+        deckCur.textContent = fmtTime(baseSec);
+        deckDur.textContent = '1:08:12';
+        deckFill.style.width = `${pct.toFixed(2)}%`;
+        deckKnob.style.left = `${pct.toFixed(2)}%`;
+      } else {
+        row1.className = 'track-row';
+        row1Rail.style.opacity = 0;
+        row1Idx.textContent = '1';
+        row2.className = 'track-row';
+        row2Rail.style.opacity = 0;
+        row2Idx.textContent = '2';
+        deckTitle.textContent = 'Ready for playback';
+        deckArtist.textContent = 'Select a track';
+        deckPlayIcon.textContent = '▶';
+        deckCur.textContent = '0:00';
+        deckDur.textContent = '0:00';
+        deckFill.style.width = '0%';
+        deckKnob.style.left = '0%';
+      }
+
+      // Downloader typing & job simulation
+      const urlEl = document.getElementById('dl-url-text');
+      if (t >= 7.2 && t < 10.65) {
+        const chars = Math.floor(easeOut(prog(t, 7.2, 8.1)) * URL_SAMPLE.length);
+        urlEl.textContent = chars > 0 ? URL_SAMPLE.slice(0, chars) : '';
+      } else {
+        urlEl.innerHTML = '<span style="color:#85858B">Paste YouTube URLs, one per line</span>';
+      }
+
+      document.getElementById('dl-banner').style.opacity = easeOut(prog(t, 8.1, 8.45));
+
+      const jobCard = document.getElementById('dl-job-card');
+      const jobShow = easeOut(prog(t, 8.92, 9.25));
+      jobCard.style.opacity = jobShow;
+      jobCard.style.transform = `translateY(${lerp(12, 0, jobShow)}px)`;
+
+      const dlPct = easeInOut(prog(t, 9.05, 10.25)) * 100;
+      const dlBar = document.getElementById('dl-job-bar');
+      const dlStatus = document.getElementById('dl-job-status');
+      const dlMeta = document.getElementById('dl-job-meta');
+      const dlPctEl = document.getElementById('dl-job-pct');
+      const dlNavDot = document.getElementById('dl-nav-dot');
+
+      dlBar.style.width = `${dlPct.toFixed(1)}%`;
+      dlPctEl.textContent = `${Math.round(dlPct)}%`;
+
+      if (t >= 10.25) {
+        dlBar.style.background = '#4CC38A';
+        dlStatus.textContent = 'done';
+        dlStatus.style.color = '#4CC38A';
+        dlMeta.textContent = '14 chapters embedded · Added to library';
+        dlNavDot.style.opacity = 0;
+      } else {
+        dlBar.style.background = '#E0A23B';
+        dlStatus.textContent = dlPct > 94 ? 'converting' : 'downloading';
+        dlStatus.style.color = '#E0A23B';
+        dlMeta.textContent = '6.4 MiB/s · ETA 00:04';
+        dlNavDot.style.opacity = t >= 8.95 ? 1 : 0;
+      }
+
+      // Right Panel Drawer (10.75 -> 11.25)
+      const rp = document.getElementById('right-panel');
+      const rpOpen = t >= 10.7 ? easeOut(prog(t, 10.7, 11.25)) : 0;
+      const rpWidth = Math.round(264 * rpOpen);
+      rp.style.width = `${rpWidth}px`;
+      rp.style.borderLeftWidth = rpWidth > 2 ? '1px' : '0px';
+
+      const ch2 = document.getElementById('ch-2');
+      const ch3 = document.getElementById('ch-3');
+      if (t >= 12.0) {
+        ch2.className = 'chapter-item';
+        ch3.className = 'chapter-item active';
+      } else {
+        ch2.className = 'chapter-item active';
+        ch3.className = 'chapter-item';
+      }
+
+      // Pointer Cursor Choreography
+      const cursor = document.getElementById('cursor');
+      const ring = document.getElementById('click-ring');
+      let cx = 640, cy = 400, cAlpha = 0, clickTime = -1;
+
+      if (t >= 3.6 && t < 5.6) {
+        cAlpha = easeOut(prog(t, 3.6, 3.9)) * (1 - prog(t, 5.1, 5.5));
+        const p = easeInOut(prog(t, 3.7, 4.5));
+        cx = lerp(760, 480, p);
+        cy = lerp(470, 305, p);
+        clickTime = 4.6;
+      } else if (t >= 6.2 && t < 9.5) {
+        cAlpha = easeOut(prog(t, 6.2, 6.45)) * (1 - prog(t, 9.1, 9.45));
+        if (t < 7.5) {
+          const p = easeInOut(prog(t, 6.3, 6.85));
+          cx = lerp(480, 200, p);
+          cy = lerp(305, 195, p);
+          clickTime = 6.95;
+        } else {
+          const p = easeInOut(prog(t, 8.2, 8.8));
+          cx = lerp(200, 1085, p);
+          cy = lerp(195, 360, p);
+          clickTime = 8.9;
+        }
+      } else if (t >= 11.2 && t < 13.0) {
+        cAlpha = easeOut(prog(t, 11.2, 11.45)) * (1 - prog(t, 12.5, 12.9));
+        const p = easeInOut(prog(t, 11.3, 11.9));
+        cx = lerp(780, 1020, p);
+        cy = lerp(310, 302, p);
+        clickTime = 12.0;
+      }
+
+      cursor.style.opacity = cAlpha;
+      const clickDip = clickTime > 0 && t >= clickTime && t <= clickTime + 0.14 ? 0.85 : 1;
+      cursor.style.left = `${cx}px`;
+      cursor.style.top = `${cy}px`;
+      cursor.style.transform = `scale(${clickDip})`;
+
+      if (clickTime > 0 && t >= clickTime && t <= clickTime + 0.45) {
+        const rpP = easeOut(prog(t, clickTime, clickTime + 0.45));
+        ring.style.opacity = 1 - rpP;
+        ring.style.left = `${cx + 4}px`;
+        ring.style.top = `${cy + 2}px`;
+        ring.style.transform = `translate(-50%, -50%) scale(${lerp(0.4, 1.5, rpP)})`;
+      } else {
+        ring.style.opacity = 0;
+      }
+
+      // Scene 5: Outro (13.85 -> 16.0)
+      const s5 = document.getElementById('scene5');
+      const s5P = easeOut(prog(t, 13.85, 14.65));
+      s5.style.opacity = s5P;
+      s5.style.transform = `translateY(${lerp(18, 0, s5P)}px)`;
+    };
+
+    window.renderFrame(0);
+  </script>
+</body>
+</html>

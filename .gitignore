@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist-electron/
+.DS_Store
+*.log
+*.mp3
+*.m4a
+*.opus
+*.ogg
+*.flac
+*.wav
+promo/frames/
+promo/tmp/

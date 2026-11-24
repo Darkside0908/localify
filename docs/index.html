@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Localify — Offline Linux Music Player &amp; YouTube Archiver</title>
+  <meta name="description" content="Offline desktop music player and yt-dlp YouTube archiver for Linux, built for local tracks and long DJ live sets." />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #0F0F10;
+      --bg-page: #141415;
+      --bg-card: #19191B;
+      --bg-raised: #232325;
+      --border: rgba(237, 237, 237, 0.08);
+      --border-strong: rgba(237, 237, 237, 0.14);
+      --text-primary: #EDEDED;
+      --text-secondary: #A1A1A6;
+      --text-muted: #85858B;
+      --accent: #E0A23B;
+      --positive: #4CC38A;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mono, code, pre, kbd {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid var(--border);
+      background: rgba(20, 20, 21, 0.9);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-inner {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .nav-links a:hover { color: var(--text-primary); }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 8px;
+      background: var(--text-primary);
+      color: var(--bg-deep);
+      font-size: 14px;
+      font-weight: 500;
+      border: 0;
+      cursor: pointer;
+      transition: background-color 150ms var(--ease), transform 150ms var(--ease);
+    }
+
+    .btn-primary:hover { background: #ffffff; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 8px;
+      background: var(--bg-raised);
+      border: 1px solid var(--border);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 150ms var(--ease), transform 150ms var(--ease);
+    }
+
+    .btn-secondary:hover { background: #2B2B2E; }
+    .btn-secondary:active { transform: scale(0.98); }
+
+    .btn-sm {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 13px;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 72px 0 48px;
+    }
+
+    .hero-head {
+      max-width: 680px;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 1.06;
+      font-weight: 500;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+    }
+
+    .hero-sub {
+      margin-top: 20px;
+      max-width: 560px;
+      font-size: 18px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .hero-actions {
+      margin-top: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .hero-meta {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Video & Interactive Showcase Frame */
+    .showcase-wrap {
+      margin-top: 48px;
+      border-radius: 16px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-deep);
+      overflow: hidden;
+    }
+
+    .showcase-toolbar {
+      height: 44px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tab-group {
+      display: inline-flex;
+      gap: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-page);
+      padding: 3px;
+    }
+
+    .tab-btn {
+      height: 26px;
+      padding: 0 12px;
+      border-radius: 5px;
+      border: 0;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 150ms var(--ease), background-color 150ms var(--ease);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-raised);
+      color: var(--text-primary);
+    }
+
+    .video-stage {
+      position: relative;
+      background: #0B0B0C;
+    }
+
+    .video-stage video {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+    }
+
+    /* Interactive Mini-Deck Preview */
+    .interactive-stage {
+      display: none;
+      padding: 24px;
+      background: var(--bg-page);
+      min-height: 380px;
+    }
+
+    .interactive-stage.visible { display: block; }
+    .video-stage.hidden { display: none; }
+
+    .mini-tabs {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .mini-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: 32px 1fr auto auto;
+      gap: 16px;
+      align-items: center;
+      height: 52px;
+      padding: 0 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 150ms var(--ease);
+    }
+
+    .mini-row:hover { background: var(--bg-card); }
+    .mini-row.active {
+      background: var(--bg-raised);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .mini-row.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* Sections */
+    .section {
+      padding: 64px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 28px;
+      line-height: 1.15;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .section-sub {
+      margin-top: 8px;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    /* Asymmetric Feature Grid */
+    .feature-grid {
+      margin-top: 32px;
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .feature-wide {
+      grid-column: span 12;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+      align-items: center;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      padding: 24px;
+    }
+
+    .feature-card {
+      grid-column: span 4;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      padding: 24px;
+    }
+
+    .feature-tag {
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    .feature-card h3,
+    .feature-wide h3 {
+      margin-top: 8px;
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .feature-card p,
+    .feature-wide p {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text-secondary);
+    }
+
+    .spec-box {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-page);
+      padding: 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    /* Install Terminal Block */
+    .install-box {
+      margin-top: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-deep);
+      overflow: hidden;
+    }
+
+    .install-head {
+      height: 44px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .install-code {
+      padding: 20px;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      overflow-x: auto;
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 380ms var(--ease), transform 380ms var(--ease);
+    }
+    .reveal.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    @media (max-width: 820px) {
+      .feature-wide { grid-template-columns: 1fr; }
+      .feature-card { grid-column: span 12; }
+      .nav-links a.hide-sm { display: none; }
+      .mini-row { grid-template-columns: 28px 1fr auto; }
+      .mini-hide { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <circle cx="12" cy="12" r="9.5" fill="none" stroke="#EDEDED" stroke-opacity="0.85" stroke-width="1.5" />
+          <circle cx="12" cy="12" r="5.5" fill="none" stroke="#EDEDED" stroke-opacity="0.3" stroke-width="1" />
+          <circle cx="12" cy="12" r="2" fill="#E0A23B" />
+        </svg>
+        <span>Localify</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#demo" class="hide-sm">Demo</a>
+        <a href="#features" class="hide-sm">Features</a>
+        <a href="#install" class="hide-sm">Install</a>
+        <a href="https://github.com/Darkside0908/localify" target="_blank" rel="noreferrer" class="btn-primary btn-sm">
+          GitHub
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero container" id="demo">
+      <div class="hero-head">
+        <h1>Offline desktop player for local audio and live sets</h1>
+        <p class="hero-sub">
+          Download YouTube tracks and hour-long DJ sets once with yt-dlp, then play everything offline on Linux with auto-resume, chapter navigation, and playlists.
+        </p>
+        <div class="hero-actions">
+          <a href="https://github.com/Darkside0908/localify" target="_blank" rel="noreferrer" class="btn-primary">
+            View on GitHub
+          </a>
+          <a href="#install" class="btn-secondary">
+            Install locally
+          </a>
+        </div>
+        <div class="hero-meta mono">
+          Electron · React · yt-dlp · ffmpeg · MIT License
+        </div>
+      </div>
+
+      <div class="showcase-wrap">
+        <div class="showcase-toolbar">
+          <div class="tab-group">
+            <button type="button" class="tab-btn active" id="tab-video">Launch reel</button>
+            <button type="button" class="tab-btn" id="tab-interactive">Interactive preview</button>
+          </div>
+          <div class="mono" style="font-size:12px; color:var(--text-muted);" id="toolbar-meta">
+            1280×720 · 30fps
+          </div>
+        </div>
+
+        <div class="video-stage" id="video-stage">
+          <video id="promo-video" src="./localify-promo.mp4" autoplay loop muted playsinline controls></video>
+        </div>
+
+        <div class="interactive-stage" id="interactive-stage">
+          <div class="mini-tabs">
+            <div>
+              <div style="font-size:16px; font-weight:500;">Library</div>
+              <div class="mono" style="font-size:12px; color:var(--text-secondary); margin-top:4px;">
+                3 tracks · 2 hr 53 min · 348 MB
+              </div>
+            </div>
+            <div class="tab-group">
+              <button type="button" class="tab-btn active" id="mini-view-lib">Library</button>
+              <button type="button" class="tab-btn" id="mini-view-dl">Downloader</button>
+            </div>
+          </div>
+
+          <div id="mini-lib-panel">
+            <div class="mini-row active" data-title="Robstee Live Set April 2026 (Opiuci Bandung)" data-pos="24:15">
+              <div class="mono" style="font-size:12px; color:var(--accent); text-align:center;">1</div>
+              <div>
+                <div style="font-size:14px; font-weight:500;">Robstee Live Set April 2026 (Opiuci Bandung)</div>
+                <div style="font-size:12px; color:var(--text-secondary);">Robstee · <span class="mono" style="color:var(--accent)">24:15</span></div>
+              </div>
+              <div class="mono mini-hide" style="font-size:12px; color:var(--text-muted);">mp3 · 226k · 163 MB</div>
+              <div class="mono" style="font-size:12px; color:var(--text-secondary);">1:40:41</div>
+            </div>
+
+            <div class="mini-row" data-title="Boiler Room London Live Set" data-pos="18:40">
+              <div class="mono" style="font-size:12px; color:var(--text-muted); text-align:center;">2</div>
+              <div>
+                <div style="font-size:14px; font-weight:500;">Boiler Room London Live Set</div>
+                <div style="font-size:12px; color:var(--text-secondary);">Fred again.. · <span class="mono" style="color:var(--accent)">14ch</span></div>
+              </div>
+              <div class="mono mini-hide" style="font-size:12px; color:var(--text-muted);">mp3 · 320k · 156 MB</div>
+              <div class="mono" style="font-size:12px; color:var(--text-secondary);">1:08:12</div>
+            </div>
+
+            <div class="mini-row" data-title="Aruarian Dance" data-pos="0:00">
+              <div class="mono" style="font-size:12px; color:var(--text-muted); text-align:center;">3</div>
+              <div>
+                <div style="font-size:14px; font-weight:500;">Aruarian Dance</div>
+                <div style="font-size:12px; color:var(--text-secondary);">Nujabes</div>
+              </div>
+              <div class="mono mini-hide" style="font-size:12px; color:var(--text-muted);">flac · 982k · 29 MB</div>
+              <div class="mono" style="font-size:12px; color:var(--text-secondary);">4:10</div>
+            </div>
+
+            <div style="margin-top:20px; padding-top:14px; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:13px;" id="mini-now-playing">
+                Active: <span style="font-weight:500;">Robstee Live Set April 2026 (Opiuci Bandung)</span>
+              </div>
+              <div class="mono" style="font-size:12px; color:var(--accent);" id="mini-now-pos">
+                Resumed at 24:15
+              </div>
+            </div>
+          </div>
+
+          <div id="mini-dl-panel" style="display:none;">
+            <div style="border-radius:10px; border:1px solid var(--border); background:var(--bg-card); padding:16px;">
+              <div class="mono" style="font-size:12px; color:var(--text-secondary); padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg-page);">
+                https://www.youtube.com/watch?v=yC4i2cy9-Mw&amp;list=RDyC4i2cy9-Mw
+              </div>
+              <div style="margin-top:10px; border-left:2px solid var(--accent); padding:6px 12px; font-size:12px; color:var(--text-secondary); background:var(--bg-page);">
+                Single track mode active (--no-playlist) — avoids pulling full radio mixes by accident
+              </div>
+              <div style="margin-top:14px; display:flex; justify-content:space-between; align-items:center;">
+                <span class="mono" style="font-size:12px; color:var(--text-muted);">MP3 · M4A · OPUS · Auto-embed cover &amp; chapters</span>
+                <span class="btn-primary btn-sm" style="pointer-events:none;">Download</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container reveal" id="features">
+      <h2 class="section-title">Built for long listening sessions</h2>
+      <p class="section-sub">Everything runs locally against your ~/Music folder with zero cloud accounts or tracking</p>
+
+      <div class="feature-grid">
+        <div class="feature-wide">
+          <div>
+            <div class="feature-tag mono">01 · Streaming &amp; resume</div>
+            <h3>Instant seeking inside 100+ minute MP3 sets</h3>
+            <p>
+              Localify serves files from a session-authenticated HTTP 206 Partial Content server on 127.0.0.1 and persists playback position for long sets so you pick up right where you paused.
+            </p>
+          </div>
+          <div class="spec-box mono">
+            GET /media/:token/:id<br />
+            Range: bytes=0-65535<br />
+            <span style="color:var(--positive);">206 Partial Content</span><br />
+            Accept-Ranges: bytes<br />
+            Chapter markers + MediaSession keys
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-tag mono">02 · Archiver</div>
+          <h3>Built-in yt-dlp queue</h3>
+          <p>
+            Paste links or import links.txt, extract MP3, M4A, or OPUS with embedded artwork and chapters, and guard radio links with --no-playlist.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-tag mono">03 · Library</div>
+          <h3>Fast ffprobe scanner</h3>
+          <p>
+            Indexes audio metadata, bitrate, duration, and embedded thumbnails across ~/Music while preserving likes, playlists, and resume positions.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-tag mono">04 · Desktop</div>
+          <h3>Linux keyboard &amp; dock ready</h3>
+          <p>
+            Supports Space, arrow seeking, Ctrl+F search, Ctrl+D downloader jump, Ubuntu hardware media keys, and one-command GNOME dock pinning.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container reveal" id="install">
+      <h2 class="section-title">Run it locally</h2>
+      <p class="section-sub">Requires Node.js 20+, yt-dlp, ffmpeg, and ffprobe on Linux</p>
+
+      <div class="install-box">
+        <div class="install-head mono">
+          <span>bash</span>
+          <button type="button" class="btn-secondary btn-sm" id="copy-install-btn">Copy</button>
+        </div>
+        <pre class="install-code mono" id="install-cmd">git clone https://github.com/Darkside0908/localify.git
+cd localify
+npm install
+npm run build
+./launch.sh
+
+# Optional: add Localify to your Ubuntu app menu
+./install-desktop-entry.sh</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>Localify · MIT License · Darkside0908</div>
+      <div>
+        Interface crafted with <a href="https://github.com/heydamir/unslop" target="_blank" rel="noreferrer" style="color:var(--text-secondary);">unslop</a> by @heydamir (CC BY 4.0)
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const tabVideo = document.getElementById('tab-video');
+    const tabInteractive = document.getElementById('tab-interactive');
+    const videoStage = document.getElementById('video-stage');
+    const interactiveStage = document.getElementById('interactive-stage');
+    const toolbarMeta = document.getElementById('toolbar-meta');
+
+    tabVideo.addEventListener('click', () => {
+      tabVideo.classList.add('active');
+      tabInteractive.classList.remove('active');
+      videoStage.classList.remove('hidden');
+      interactiveStage.classList.remove('visible');
+      toolbarMeta.textContent = '1280×720 · 30fps';
+    });
+
+    tabInteractive.addEventListener('click', () => {
+      tabInteractive.classList.add('active');
+      tabVideo.classList.remove('active');
+      videoStage.classList.add('hidden');
+      interactiveStage.classList.add('visible');
+      toolbarMeta.textContent = 'Interactive preview';
+    });
+
+    const miniLibBtn = document.getElementById('mini-view-lib');
+    const miniDlBtn = document.getElementById('mini-view-dl');
+    const miniLibPanel = document.getElementById('mini-lib-panel');
+    const miniDlPanel = document.getElementById('mini-dl-panel');
+
+    miniLibBtn.addEventListener('click', () => {
+      miniLibBtn.classList.add('active');
+      miniDlBtn.classList.remove('active');
+      miniLibPanel.style.display = 'block';
+      miniDlPanel.style.display = 'none';
+    });
+
+    miniDlBtn.addEventListener('click', () => {
+      miniDlBtn.classList.add('active');
+      miniLibBtn.classList.remove('active');
+      miniDlPanel.style.display = 'block';
+      miniLibPanel.style.display = 'none';
+    });
+
+    document.querySelectorAll('.mini-row').forEach((row) => {
+      row.addEventListener('click', () => {
+        document.querySelectorAll('.mini-row').forEach((r) => r.classList.remove('active'));
+        row.classList.add('active');
+        document.getElementById('mini-now-playing').innerHTML =
+          `Active: <span style="font-weight:500;">${row.dataset.title}</span>`;
+        document.getElementById('mini-now-pos').textContent =
+          row.dataset.pos === '0:00' ? 'Playing from start' : `Resumed at ${row.dataset.pos}`;
+      });
+    });
+
+    const copyBtn = document.getElementById('copy-install-btn');
+    copyBtn.addEventListener('click', async () => {
+      const text = document.getElementById('install-cmd').textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = 'Copied';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1600);
+      } catch {
+        copyBtn.textContent = 'Select manually';
+      }
+    });
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>
